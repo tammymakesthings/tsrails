@@ -107,12 +107,14 @@ printf "\n"
 project_name = Dir.getwd.split(File::SEPARATOR).last
 
 setup_git_repo = yes?("Do you want to set up a remote Git repository?")
-generate_apache_conf = yes?("Do you want to generate an Apache/Passenger Config?").trim
+generate_apache_conf = yes?("Do you want to generate an Apache/Passenger Config?")
 if generate_apache_conf
   install_apache_conf = yes?("Do you want to attempt to install the Apache/Passenger Config?")
 else
   install_apache_conf = false
 end
+setup_vagrant = yes?("Do you want to set up a Vagrant VM instance for this site?")
+
 printf "\n"
 
 if setup_git_repo || generate_apache_conf
@@ -120,7 +122,7 @@ if setup_git_repo || generate_apache_conf
   proj_name_taken = git_name_taken?(project_name) || apache_name_taken?(project_name)
   while proj_name_taken
     msg :warning, "Project name \"#{project_name}\" is already taken. Please select another."
-    project_name = ask("Please select a project name: ")
+    project_name = ask("Please select a project name: ").trim
     proj_name_taken = git_name_taken?(project_name) || apache_name_taken?(project_name)
   end
 else
@@ -141,6 +143,7 @@ printf "\n"
 # Remove unneeded files
 #============================================================================
 
+printf "\n"
 msg :info, "Removing unneeded files from Rails project"
 
 remove_file "public/index.html"
@@ -156,10 +159,27 @@ empty_directory_with_gitkeep "log"
 empty_directory_with_gitkeep "public/images"
 empty_directory_with_gitkeep "spec/support"
 
+remove_file ".gitignore"
+file ".gitignore", 
+%q{# Git ignore file
+.bundle
+db/*.sqlite3
+log/*.log
+tmp/**/*
+.*.swp
+*~
+*.tmp
+.idea
+.idea/*
+.DS_Store
+.vagrant
+}
+
 #============================================================================
 # Add gems
 #============================================================================
 
+printf "\n"
 msg :info, "Adding Ruby gems"
 remove_file "Gemfile"
 file "Gemfile",
@@ -214,6 +234,7 @@ run "bundle install"
 # Create the config_file initializer
 #============================================================================
 
+printf "\n"
 msg :info, "Adding initializer for app_config file"
 inside('config') do
   file "app_config.yml", 
@@ -249,12 +270,16 @@ end
 # Set up database
 #============================================================================
 
+printf "\n"
+msg :info, "Creating databases"
 rake "db:create"
+rake "db:test:prepare"
 
 #============================================================================
 # Install jQuery
 #============================================================================
 
+printf "\n"
 msg :info, "Changing Javascript library from script.aculo.us to jQuery"
 remove_file "public/javascripts/controls.js"
 remove_file "public/javascripts/dragdrop.js"
@@ -347,6 +372,7 @@ end
 # Extra app configuration tweaks
 #============================================================================
 
+printf "\n"
 msg :info, "Making minor application configuration tweaks"
 
 extra_app_config = <<-RUBY
@@ -369,6 +395,9 @@ route "root :to => 'Clearance::Sessions#new'"
 # Generate rspec and cucumber stuff
 #============================================================================
 
+printf "\n"
+msg :info, "Setting up RSpec and Cucumber"
+
 generators_config = <<-RUBY
     config.generators do |generate|
       generate.test_framework :rspec
@@ -377,7 +406,6 @@ generators_config = <<-RUBY
 RUBY
 inject_into_class "config/application.rb", "Application", generators_config
 
-msg :info, "Setting up RSpec and Cucumber"
 generate "rspec:install"
 generate "cucumber:install", "--rspec", "--capybara"
 
@@ -436,7 +464,9 @@ inject_into_file "features/support/env.rb",
 # Install tiny_mce files
 #============================================================================
 
+printf "\n"
 msg :info, "Installing files needed by tiny_mce"
+
 rake "tiny_mce:install"
 remove_file "config/tiny_mce.yml"
 
@@ -462,6 +492,7 @@ plugins:
 # Install flutie files
 #============================================================================
 
+printf "\n"
 msg :info, "Installing Flutie files"
 rake "flutie:install"
 
@@ -469,6 +500,7 @@ rake "flutie:install"
 # Install Formtastic stuff
 #============================================================================
 
+printf "\n"
 msg :info, "Installing Formtastic files"
 generate "formtastic:install"
 
@@ -476,6 +508,7 @@ generate "formtastic:install"
 # Generate Clearance stuff
 #============================================================================
 
+printf "\n"
 msg :info, "Generating Clearance files and associated model objects and mocks"
 
 generate "clearance_features"
@@ -496,9 +529,10 @@ end
 }
 
 #============================================================================
-# Generate flashes partial
+# Generate partials and layouts
 #============================================================================
 
+printf "\n"
 msg :info, "Generating shared view partials"
 
 empty_directory "app/views/shared"
@@ -549,13 +583,145 @@ file 'app/views/layouts/application.html.erb',
 # Create RVM file
 #============================================================================
 
+printf "\n"
 msg :info, "Generating rvmrc file"
 file ".rvmrc", %q{rvm 1.8.7-head}
+
+#============================================================================
+# Set up Vagrant to run the application
+#============================================================================
+
+if setup_vagrant
+  printf "\n"
+  msg :info, "Setting up Vagrant instance"
+  file "Vagrantfile", 
+%q{# Vagrant configuration
+Vagrant::Config.run do |config|
+  config.vm.box = "lucid64"
+  config.vm.forward_port("web", 80, 8080)
+  config.vm.forward_port("web-ssl", 443, 4443)
+  config.vm.forward_port("ftp", 21, 21321)
+  config.vm.forward_port("mongrel", 3000, 13000)  
+  
+  config.vm.provisioner = :chef_solo  
+  config.chef.cookbooks_path = ["~/chef_cookbooks/tcravit_chef",
+                                  "~/chef_cookbooks/opscode_chef_cookbooks",
+                                  "vagrant"]
+  config.chef.add_recipe("vagrant_main")
+end
+}
+
+  empty_directory_with_gitkeep "vagrant"
+  empty_directory_with_gitkeep "vagrant/vagrant_main"
+  empty_directory_with_gitkeep "vagrant/vagrant_main/recipes"
+  empty_directory_with_gitkeep "vagrant/vagrant_main/templates"
+  empty_directory_with_gitkeep "vagrant/vagrant_main/templates/default"
+
+  file "vagrant/vagrant_main/recipes/default.rb", <<-VAGRANT
+############################################################################
+# Vagrant provisioning scrpt
+############################################################################
+
+# Install needed compiler and system libraries
+require_recipe "apt"
+require_recipe "build-essential"
+require_recipe "xml"
+require_recipe "xslt"
+
+# Insatll the Apache/rails/MySQL/passenger stack
+require_recipe "apache2"
+require_recipe "openssl"
+require_recipe "mysql::server"
+require_recipe "rails"
+require_recipe "passenger_apache2::mod_rails"
+require_recipe "sqlite"
+
+# Install the git SCM
+require_recipe "git"
+
+# Disable the default apache site
+execute "disable-default-site" do
+  command "sudo a2dissite default"
+  notifies :restart, resources(:service => "apache2")
+end
+
+# Update rubygems
+execute "update-rubygems" do
+        command "sudo /usr/bin/gem update --system"
+        action :run
+end
+
+# Seed a few system-level gems; we let bundler take care of the rest
+gem_package "bundler" do
+        version ">1.0.0"
+        action :install
+end
+
+gem_package "rails" do
+  version "~> 3.0.0"
+  action :install
+end
+
+# Set up the sbairbus web app
+web_app "sbairbus" do
+  docroot "/vagrant/public"
+  server_name "#{project_name}.\#{node[:domain]}"
+  server_aliases [ "#{project_name}", node[:hostname], "#{project_name}.local", "vagrantbase.local" ]
+  rails_env "production"
+  notifies :restart, resources(:service => "apache2")
+end
+
+execute "install-bundled-gems" do
+  command "bundle install"
+  cwd "/vagrant"
+  action :run
+end
+VAGRANT
+
+  file "vagrant/vagrant_main/templates/default/web_app.conf.erb", 
+%q{
+<VirtualHost *:80>
+  ServerName <%= @params[:server_name] %>
+  ServerAlias <% @params[:server_aliases].each do |a| %><%= "#{a}" %> <% end %>
+  DocumentRoot <%= @params[:docroot] %>
+
+  RailsBaseURI /
+  RailsEnv <%= @params[:rails_env] %>
+  RailsAllowModRewrite on
+  PassengerMaxPoolSize <%= @node[:rails][:max_pool_size] %>
+
+  <Directory <%= @params[:docroot] %>>
+    Options FollowSymLinks
+    AllowOverride None
+    Order allow,deny
+    Allow from all
+  </Directory>
+
+  LogLevel info
+  ErrorLog <%= @node[:apache][:log_dir] %>/<%= @params[:name] %>-error.log
+  CustomLog <%= @node[:apache][:log_dir] %>/<%= @params[:name] %>-access.log combined
+
+  RewriteEngine On
+  RewriteLog <%= @node[:apache][:log_dir] %>/<%= @application_name %>-rewrite.log
+  RewriteLogLevel 0
+
+  # Canonical host
+  RewriteCond %{HTTP_HOST}   !^<%= @params[:server_name] %> [NC]
+  RewriteCond %{HTTP_HOST}   !^$
+  RewriteRule ^/(.*)$        http://<%= @params[:server_name] %>/$1 [L,R=301]
+
+  RewriteCond %{DOCUMENT_ROOT}/system/maintenance.html -f
+  RewriteCond %{SCRIPT_FILENAME} !maintenance.html
+  RewriteRule ^.*$ /system/maintenance.html [L]
+</VirtualHost>  
+}
+end
 
 #============================================================================
 # Set up Git
 #============================================================================
 
+printf "\n"
 msg :info, "Setting up local git repository"
 git :init
 git :add => "."
@@ -582,6 +748,7 @@ end
 #============================================================================
 
 unless project_name.blank?
+  printf "\n"
   msg :info, "Setting up Capistrano configuration for #{STAGING_SERVER_NAME}"
   capify!
   
@@ -641,6 +808,7 @@ end
 #============================================================================
 
 if generate_apache_conf
+  printf "\n"
   msg :info, "Generating Apache configuration file."
   file "config/apache_config.conf", <<-APACHE_CONF
 <VirtualHost *:80>
@@ -667,6 +835,7 @@ APACHE_CONF
   git :commit => "-m 'Added apache configuration file from application template'"
   
   if install_apache_conf
+    printf "\n"
     msg :info, "Installing Apache configuration and deploying application."
     run "ssh #{STAGING_SERVER_NAME} mkdir #{REMOTE_APACHE_DIR}/#{project_name}.taylored-software.com"
     run "scp config/apache_config.conf #{STAGING_SERVER_NAME}:/tmp/#{project_name}.taylored-software.com.conf"
