@@ -594,6 +594,9 @@ set :git_enable_submodules, 1
 
 ssh_options[:compression] = false
 ssh_options[:auth_methods] = %w{publickey password keyboard-interactive}
+ssh_options[:forward_agent] = true # Agent forwarding keys
+
+default_run_options[:pty] = true  # Must be set for the password prompt from git to work
 
 role :web,            "#{STAGING_SERVER_NAME}"
 role :app,            "#{STAGING_SERVER_NAME}"
@@ -610,6 +613,18 @@ namespace :bundler do
 
   task :bundle_new_release, :roles => :app, :except => { :no_release => true } do
     run("cd \#\{release_path\} && bundle install")
+  end
+end
+
+namespace :deploy do
+  desc "Restarting mod_rails with restart.txt"
+  task :restart, :roles => :app, :except => { :no_release => true } do
+    run "touch \#\{current_path\}/tmp/restart.txt"
+  end
+
+  [:start, :stop].each do |t|
+    desc "\#\{t\} task is a no-op with mod_rails"
+    task t, :roles => :app do ; end
   end
 end
 
@@ -632,7 +647,6 @@ if generate_apache_conf
   ServerName #{project_name}.taylored-software.com
   DocumentRoot #{REMOTE_APACHE_DIR}/#{project_name}.taylored-software.com/current/public
 
-  CustomLog #{REMOTE_APACHE_DIR}/#{project_name}.taylored-software.com/current/log/apache_access_log "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"" 
   ErrorLog #{REMOTE_APACHE_DIR}/#{project_name}.taylored-software.com/current/log/apache_error_log
 
   RailsSpawnMethod smart
