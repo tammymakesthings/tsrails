@@ -141,7 +141,6 @@ printf "**********************************************************************\n
 printf "You can walk away from the computer now. No further user interaction\n".magenta
 printf "should be required to finish generating the application.\n".magenta
 printf "**********************************************************************\n".magenta
-printf "\n"
 
 #============================================================================
 # Remove unneeded files
