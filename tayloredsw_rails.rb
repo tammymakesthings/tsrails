@@ -21,6 +21,11 @@ REMOTE_APACHE_DIR="/var/sites"
 # Helper functions
 #============================================================================
 
+def extract_tarball(tarfile, destination)
+  template_root = File.expand_path(File.join(File.dirname(__FILE__)))
+  run "tar jxvf #{template_root}/#{tarfile} -C #{destination}"
+end
+
 def get_file(http_location, file)
   uri = URI.parse(http_location)
   contents = Net::HTTP.get(uri)
@@ -113,7 +118,6 @@ if generate_apache_conf
 else
   install_apache_conf = false
 end
-setup_vagrant = yes?("Do you want to set up a Vagrant VM instance for this site?")
 
 printf "\n"
 
@@ -172,7 +176,6 @@ tmp/**/*
 .idea
 .idea/*
 .DS_Store
-.vagrant
 }
 
 #============================================================================
@@ -588,136 +591,6 @@ msg :info, "Generating rvmrc file"
 file ".rvmrc", %q{rvm 1.8.7-head}
 
 #============================================================================
-# Set up Vagrant to run the application
-#============================================================================
-
-if setup_vagrant
-  printf "\n"
-  msg :info, "Setting up Vagrant instance"
-  file "Vagrantfile", 
-%q{# Vagrant configuration
-Vagrant::Config.run do |config|
-  config.vm.box = "lucid64"
-  config.vm.forward_port("web", 80, 8080)
-  config.vm.forward_port("web-ssl", 443, 4443)
-  config.vm.forward_port("ftp", 21, 21321)
-  config.vm.forward_port("mongrel", 3000, 13000)  
-  
-  config.vm.provisioner = :chef_solo  
-  config.chef.cookbooks_path = ["~/chef_cookbooks/tcravit_chef",
-                                  "~/chef_cookbooks/opscode_chef_cookbooks",
-                                  "vagrant"]
-  config.chef.add_recipe("vagrant_main")
-end
-}
-
-  empty_directory_with_gitkeep "vagrant"
-  empty_directory_with_gitkeep "vagrant/vagrant_main"
-  empty_directory_with_gitkeep "vagrant/vagrant_main/recipes"
-  empty_directory_with_gitkeep "vagrant/vagrant_main/templates"
-  empty_directory_with_gitkeep "vagrant/vagrant_main/templates/default"
-
-  file "vagrant/vagrant_main/recipes/default.rb", <<-VAGRANT
-############################################################################
-# Vagrant provisioning scrpt
-############################################################################
-
-# Install needed compiler and system libraries
-require_recipe "apt"
-require_recipe "build-essential"
-require_recipe "xml"
-require_recipe "xslt"
-
-# Insatll the Apache/rails/MySQL/passenger stack
-require_recipe "apache2"
-require_recipe "openssl"
-require_recipe "mysql::server"
-require_recipe "rails"
-require_recipe "passenger_apache2::mod_rails"
-require_recipe "sqlite"
-
-# Install the git SCM
-require_recipe "git"
-
-# Disable the default apache site
-execute "disable-default-site" do
-  command "sudo a2dissite default"
-  notifies :restart, resources(:service => "apache2")
-end
-
-# Update rubygems
-execute "update-rubygems" do
-        command "sudo /usr/bin/gem update --system"
-        action :run
-end
-
-# Seed a few system-level gems; we let bundler take care of the rest
-gem_package "bundler" do
-        version ">1.0.0"
-        action :install
-end
-
-gem_package "rails" do
-  version "~> 3.0.0"
-  action :install
-end
-
-# Set up the sbairbus web app
-web_app "sbairbus" do
-  docroot "/vagrant/public"
-  server_name "#{project_name}.\#{node[:domain]}"
-  server_aliases [ "#{project_name}", node[:hostname], "#{project_name}.local", "vagrantbase.local" ]
-  rails_env "production"
-  notifies :restart, resources(:service => "apache2")
-end
-
-execute "install-bundled-gems" do
-  command "bundle install"
-  cwd "/vagrant"
-  action :run
-end
-VAGRANT
-
-  file "vagrant/vagrant_main/templates/default/web_app.conf.erb", 
-%q{
-<VirtualHost *:80>
-  ServerName <%= @params[:server_name] %>
-  ServerAlias <% @params[:server_aliases].each do |a| %><%= "#{a}" %> <% end %>
-  DocumentRoot <%= @params[:docroot] %>
-
-  RailsBaseURI /
-  RailsEnv <%= @params[:rails_env] %>
-  RailsAllowModRewrite on
-  PassengerMaxPoolSize <%= @node[:rails][:max_pool_size] %>
-
-  <Directory <%= @params[:docroot] %>>
-    Options FollowSymLinks
-    AllowOverride None
-    Order allow,deny
-    Allow from all
-  </Directory>
-
-  LogLevel info
-  ErrorLog <%= @node[:apache][:log_dir] %>/<%= @params[:name] %>-error.log
-  CustomLog <%= @node[:apache][:log_dir] %>/<%= @params[:name] %>-access.log combined
-
-  RewriteEngine On
-  RewriteLog <%= @node[:apache][:log_dir] %>/<%= @application_name %>-rewrite.log
-  RewriteLogLevel 0
-
-  # Canonical host
-  RewriteCond %{HTTP_HOST}   !^<%= @params[:server_name] %> [NC]
-  RewriteCond %{HTTP_HOST}   !^$
-  RewriteRule ^/(.*)$        http://<%= @params[:server_name] %>/$1 [L,R=301]
-
-  RewriteCond %{DOCUMENT_ROOT}/system/maintenance.html -f
-  RewriteCond %{SCRIPT_FILENAME} !maintenance.html
-  RewriteRule ^.*$ /system/maintenance.html [L]
-</VirtualHost>  
-}
-end
-
-#============================================================================
 # Set up Git
 #============================================================================
 
@@ -775,11 +648,11 @@ set :keep_releases,   12
 
 namespace :bundler do
   task :install_gem do
-    run("sudo gem install bundler --source=http://gemcutter.org")
+    run("sudo /opt/ree/bin/gem install bundler --source=http://gemcutter.org")
   end
 
   task :bundle_new_release, :roles => :app, :except => { :no_release => true } do
-    run("cd \#\{release_path\} && bundle install")
+    run("cd \#\{release_path\} && /opt/ree/bin/bundle install")
   end
 end
 
