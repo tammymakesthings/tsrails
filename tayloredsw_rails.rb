@@ -107,7 +107,7 @@ printf "\n"
 project_name = Dir.getwd.split(File::SEPARATOR).last
 
 setup_git_repo = yes?("Do you want to set up a remote Git repository?")
-generate_apache_conf = yes?("Do you want to generate an Apache/Passenger Config?")
+generate_apache_conf = yes?("Do you want to generate an Apache/Passenger Config?").trim
 if generate_apache_conf
   install_apache_conf = yes?("Do you want to attempt to install the Apache/Passenger Config?")
 else
@@ -644,7 +644,7 @@ if generate_apache_conf
   msg :info, "Generating Apache configuration file."
   file "config/apache_config.conf", <<-APACHE_CONF
 <VirtualHost *:80>
-  ServerName #{project_name}.taylored-software.com
+  ServerName #{project_name.gsub('_', '-')}.taylored-software.com
   DocumentRoot #{REMOTE_APACHE_DIR}/#{project_name}.taylored-software.com/current/public
 
   ErrorLog #{REMOTE_APACHE_DIR}/#{project_name}.taylored-software.com/current/log/apache_error_log
