@@ -21,11 +21,6 @@ REMOTE_APACHE_DIR="/var/sites"
 # Helper functions
 #============================================================================
 
-def extract_tarball(tarfile, destination)
-  template_root = File.expand_path(File.join(File.dirname(__FILE__)))
-  run "tar jxvf #{template_root}/#{tarfile} -C #{destination}"
-end
-
 def get_file(http_location, file)
   uri = URI.parse(http_location)
   contents = Net::HTTP.get(uri)
@@ -41,7 +36,7 @@ def msg(mtype, message)
   if (mtype.nil?)
     printf "message".green
   elsif (mtype.to_s.blank?)
-    printf "message".green    
+    printf "message".green
   elsif (mtype.to_s.downcase == "info")
     printf "info".cyan
   elsif (mtype.to_s.downcase == "warning")
@@ -90,6 +85,12 @@ def action_mailer_host(rails_env, host)
     :before => "\nend"
   )
 end
+
+def section(descr)
+  printf "\n"
+  msg :info, descr
+end
+
 #============================================================================
 # Startup
 #============================================================================
@@ -111,14 +112,19 @@ printf "\n"
 
 project_name = Dir.getwd.split(File::SEPARATOR).last
 
-setup_git_repo = yes?("Do you want to set up a remote Git repository?")
-generate_apache_conf = yes?("Do you want to generate an Apache/Passenger Config?")
+client_name = ask("What is the client name for this project? ")
+if client_name.blank?
+  msg :notice, "Blank client name specified; using \"Taylored Software\""
+  client_name = "Taylored Software"
+end
+
+setup_git_repo = yes?("Do you want to set up a remote Git repository? ")
+generate_apache_conf = yes?("Do you want to generate an Apache/Passenger Config? ")
 if generate_apache_conf
-  install_apache_conf = yes?("Do you want to attempt to install the Apache/Passenger Config?")
+  install_apache_conf = yes?("Do you want to attempt to install the Apache/Passenger Config? ")
 else
   install_apache_conf = false
 end
-
 printf "\n"
 
 if setup_git_repo || generate_apache_conf
@@ -126,7 +132,7 @@ if setup_git_repo || generate_apache_conf
   proj_name_taken = git_name_taken?(project_name) || apache_name_taken?(project_name)
   while proj_name_taken
     msg :warning, "Project name \"#{project_name}\" is already taken. Please select another."
-    project_name = ask("Please select a project name: ").trim
+    project_name = ask("Please select a project name: ")
     proj_name_taken = git_name_taken?(project_name) || apache_name_taken?(project_name)
   end
 else
@@ -146,8 +152,7 @@ printf "**********************************************************************\n
 # Remove unneeded files
 #============================================================================
 
-printf "\n"
-msg :info, "Removing unneeded files from Rails project"
+section "Removing unneeded files from Rails project"
 
 remove_file "public/index.html"
 remove_file "README"
@@ -156,33 +161,17 @@ remove_file "public/robots.txt"
 remove_file "public/images/rails.png"
 
 empty_directory_with_gitkeep "app/models"
-empty_directory_with_gitkeep "app/views/pages"
 empty_directory_with_gitkeep "db/migrate"
 empty_directory_with_gitkeep "log"
 empty_directory_with_gitkeep "public/images"
 empty_directory_with_gitkeep "spec/support"
 
-remove_file ".gitignore"
-file ".gitignore", 
-%q{# Git ignore file
-.bundle
-db/*.sqlite3
-log/*.log
-tmp/**/*
-.*.swp
-*~
-*.tmp
-.idea
-.idea/*
-.DS_Store
-}
-
 #============================================================================
 # Add gems
 #============================================================================
 
-printf "\n"
-msg :info, "Adding Ruby gems"
+section "Adding Ruby gems (this may take a while)"
+
 remove_file "Gemfile"
 file "Gemfile",
 %q{
@@ -192,6 +181,8 @@ gem "rails", ">= 3.0"
 gem "rack"
 gem "clearance", "0.9.0.rc9"
 gem "haml"
+gem "haml-rails"
+gem "hpricot"
 gem "high_voltage"
 gem "RedCloth", :require => "redcloth"
 gem "paperclip"
@@ -200,6 +191,15 @@ gem "formtastic"
 gem "flutie"
 gem "dynamic_form"
 gem 'tiny_mce'
+gem "capistrano"
+gem "error_messages_for"
+gem "nokogiri"
+gem "yaml_config_file", "~> 0.2.3"
+
+group :development do
+  gem "mongrel"
+  gem "rails-footnotes"
+end
 
 # http://blog.davidchelimsky.net/2010/07/11/rspec-rails-2-generators-and-rake-tasks/
 group :development, :test, :cucumber do
@@ -212,7 +212,7 @@ group :development, :test, :cucumber do
 end
 
 group :test, :cucumber do
-  gem "factory_girl_rails"
+  gem "factory_girl_rails", "~> 1.0"
   gem "bourne"
   gem "capybara"
   gem "database_cleaner"
@@ -226,26 +226,43 @@ end
 
 group :production do
   gem "mysql", "2.8.1"
+  gem "mongrel"
+  gem "mongrel_cluster"
 end  
 }
-
-msg :info, "Running \"bundle install\" - this may take a moment"
 run "bundle install"
+
+#============================================================================
+# Set up Exception Notification E-mailer
+#============================================================================
+
+section "Installing and configuring exception_notification plugin"
+
+run "git clone git://github.com/rails/exception_notification vendor/plugins"
+exception_notify_config <<-NOTIFY
+config.middleware.use ExceptionNotifier,
+  :email_prefix => "[#{project_name}] ",
+  :sender_address => %{"notifier" <notifier@taylored-software.com>},
+  :exception_recipients => %w{tcravit@taylored-software.com}
+NOTIFY
+
+inject_into_class "config/application.rb", "Application", exception_notify_config
 
 #============================================================================
 # Create the config_file initializer
 #============================================================================
 
-printf "\n"
-msg :info, "Adding initializer for app_config file"
+section "Adding initializer for app_config file"
+
 inside('config') do
-  file "app_config.yml", 
-%q{# This is the application configuration file. Add your settings here.
+  file "app_config.yml", <<-EOF
+# This is the application configuration file. Add your settings here.
 # Settings in each of the environment-specific sections will override
 # equivalently-named settings in the global section.
 
 global:
-  dummy_setting: 0
+  client_name: #{client_name}
+  project_name: #{project_name}
 
 development:
   dummy_setting: 1
@@ -255,7 +272,7 @@ test:
 
 production:
   dummy_setting: 3  
-}
+EOF
 
   file "app_config.rb",
 %q{# Initializer to load the YAML configuration file from config/app_config.yml
@@ -272,8 +289,8 @@ end
 # Set up database
 #============================================================================
 
-printf "\n"
-msg :info, "Creating databases"
+section "Creating databases"
+
 rake "db:create"
 rake "db:test:prepare"
 
@@ -281,8 +298,8 @@ rake "db:test:prepare"
 # Install jQuery
 #============================================================================
 
-printf "\n"
-msg :info, "Changing Javascript library from script.aculo.us to jQuery"
+section "Changing Javascript library from script.aculo.us to jQuery"
+
 remove_file "public/javascripts/controls.js"
 remove_file "public/javascripts/dragdrop.js"
 remove_file "public/javascripts/effects.js"
@@ -374,8 +391,7 @@ end
 # Extra app configuration tweaks
 #============================================================================
 
-printf "\n"
-msg :info, "Making minor application configuration tweaks"
+section "Making application configuration tweaks"
 
 extra_app_config = <<-RUBY
 config.time_zone = 'Pacific Time (US & Canada)'
@@ -393,20 +409,79 @@ action_mailer_host "production",  "#{project_name}.taylored-software.com"
 
 route "root :to => 'Clearance::Sessions#new'"
 
-#============================================================================
-# Generate rspec and cucumber stuff
-#============================================================================
-
-printf "\n"
-msg :info, "Setting up RSpec and Cucumber"
-
 generators_config = <<-RUBY
     config.generators do |generate|
       generate.test_framework :rspec
       generate.fixture_replacement :factory_girl, :dir => "spec/factories"
+      generate.template_engine :haml
     end
 RUBY
 inject_into_class "config/application.rb", "Application", generators_config
+
+remove "app/helpers/application_helper.rb"
+file "app/helpers/application_helper.rb", 
+%q{module ApplicationHelper
+  def body_class
+    qualified_controller_name = controller.controller_path.gsub('/','-')
+    "#{qualified_controller_name} #{qualified_controller_name}-#{controller.action_name}"
+  end
+end}
+
+file "config/initializers/requires.rb", 
+%q{
+  Dir[File.join(RAILS_ROOT, 'lib', 'extensions', '*.rb')].each do |f|
+    require f
+  end
+
+  Dir[File.join(RAILS_ROOT, 'lib', '*.rb')].each do |f|
+    require f
+  end  
+}
+
+file "config/initializers/noisy_attr_accessible.rb",
+%q{ActiveRecord::Base.class_eval do
+  def log_protected_attribute_removal(*attributes)
+    raise "Can't mass-assign these protected attributes: #{attributes.join(', ')}"
+  end
+end
+}
+
+remove "config/initializers/backtrace_silencers.rb"
+file "config/initializers/backtrace_silencers.rb",
+%q{SHOULDA_NOISE      = %w( shoulda )
+FACTORY_GIRL_NOISE = %w( factory_girl )
+THOUGHTBOT_NOISE   = SHOULDA_NOISE + FACTORY_GIRL_NOISE
+
+Rails.backtrace_cleaner.add_silencer do |line| 
+  THOUGHTBOT_NOISE.any? { |dir| line.include?(dir) }
+end
+
+# When debugging, uncomment the next line.
+# Rails.backtrace_cleaner.remove_silencers!
+}
+
+
+#============================================================================
+# Mongrel configuration
+#============================================================================
+
+section "Setting up mongrel_cluster"
+file "config/mongrel_cluster.yml", 
+%q{--- 
+# cwd: /home/CHANGEME/apps/CHANGEME/current
+# port: "3030"
+environment: production
+address: 127.0.0.1
+pid_file: log/mongrel.pid
+servers: 3
+}
+
+
+#============================================================================
+# Generate rspec and cucumber stuff
+#============================================================================
+
+section "Setting up RSpec and Cucumber"
 
 generate "rspec:install"
 generate "cucumber:install", "--rspec", "--capybara"
@@ -462,12 +537,46 @@ inject_into_file "features/support/env.rb",
                  %{Capybara.save_and_open_page_path = 'tmp'\n},
                  :before => %{Capybara.default_selector = :css}
 
+remove "spec/rcov.opts"
+file "spec/rcov.opts", 
+%q{--exclude "spec/*,gems/*"
+--rails
+}
+
+remove "spec/spec.opts"
+file "spec/spec.opts", 
+%q{--colour
+--format progress
+--loadby mtime
+--reverse
+}
+
+file "features/step_definitions/debug_steps.rb", 
+%q{#
+When 'I save and open the page' do
+  save_and_open_page
+end
+
+Then /^show me the sent emails?$/ do
+  pretty_emails = ActionMailer::Base.deliveries.map do |mail|
+    <<-OUT
+To: #{mail.to.inspect}
+From: #{mail.from.inspect}
+Subject: #{mail.subject}
+Body:
+#{mail.body}
+.
+      OUT
+    end
+    puts pretty_emails.join("\n")
+  end    
+}
+
 #============================================================================
 # Install tiny_mce files
 #============================================================================
 
-printf "\n"
-msg :info, "Installing files needed by tiny_mce"
+section "Installing files needed by tiny_mce"
 
 rake "tiny_mce:install"
 remove_file "config/tiny_mce.yml"
@@ -494,24 +603,21 @@ plugins:
 # Install flutie files
 #============================================================================
 
-printf "\n"
-msg :info, "Installing Flutie files"
+section "Installing Flutie files"
 rake "flutie:install"
 
 #============================================================================
 # Install Formtastic stuff
 #============================================================================
 
-printf "\n"
-msg :info, "Installing Formtastic files"
+section "Installing Formtastic files"
 generate "formtastic:install"
 
 #============================================================================
 # Generate Clearance stuff
 #============================================================================
 
-printf "\n"
-msg :info, "Generating Clearance files and associated model objects and mocks"
+section "Generating Clearance files and associated model objects and mocks"
 
 generate "clearance_features"
 generate :model, "user name:string"
@@ -531,53 +637,72 @@ end
 }
 
 #============================================================================
-# Generate partials and layouts
+# Generate flashes partial
 #============================================================================
 
-printf "\n"
-msg :info, "Generating shared view partials"
+section "Generating shared view partials"
 
 empty_directory "app/views/shared"
 
-file 'app/views/shared/_flashes.html.erb', 
-%q{<div id="flash">
-  <% flash.each do |key, value| -%>
-    <div id="flash_<%= key %>"><%=h value %></div>
-  <% end -%>
-</div>
+file 'app/views/shared/_flashes.html.haml', 
+%q{#flashes
+  - if flash[:notice]
+    #flash_notice
+      %p= flash[:notice]
+  - if flash[:error]
+    #flash_error
+      %p= flash[:error]
+  - if flash[:info]
+    #flash_info
+      %p= flash[:info]
 }
 
-file 'app/views/shared/_javascript.html.erb',
-%q{<%= javascript_include_tag 'jquery', 'jquery-ui', 'prefilled_input',  :cache => true %>
-<%= yield :javascript %>
+file 'app/views/shared/_javascript.html.haml', 
+%q{= javascript_include_tag 'jquery', 'jquery-ui', 'prefilled_input',  :cache => true
+= yield :javascript
+}
+
+file 'app/views/shared/_footer.html.haml',
+%q{#footer
+  Copyright &copy;
+  = Time.now.year
+  , 
+  = APP_CONFIG[:client_name]
+  . All rights reserved. Web development by
+  %a{:href => "http://www.taylored-software.com", :target => "_blank"}
+    Taylored Software
+  .
+}
+
+file 'app/views/shared/_sign_in_out.html.haml',
+%q{- if signed_in?
+  = link_to "Sign out", sign_out_path, :method => :delete
+- else
+  = link_to "Sign in", sign_in_path
 }
 
 remove_file 'app/views/layouts/application.html.erb'
-file 'app/views/layouts/application.html.erb',
-%q{<!DOCTYPE html>
-<html>
-  <head>
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-    <title>susptest</title>
-    <%= stylesheet_link_tag :flutie, 'screen', :media => 'all', :cache => true %>
-    <%= javascript_include_tag "jquery", "jquery-ui", "prefilled_input", "rails", "application", :cache => true %>
-    <%= csrf_meta_tag %>
-    <%= include_tiny_mce_if_needed %>
-    <%= yield :head %>
-  </head>
-  <body class="<%= body_class %>">
-    <div id="header">
-      <% if signed_in? -%>
-        <%= link_to "Sign out", sign_out_path, :method => :delete %>
-      <% else -%>
-        <%= link_to "Sign in", sign_in_path %>
-      <% end -%>
-    </div>
-    <%= render :partial => 'shared/flashes' -%>
-    <%= yield %>
-    <%= render :partial => 'shared/javascript' %>
-  </body>
-</html>  
+file 'app/views/layouts/application.html.haml',
+%q{!!!
+%html
+  %head
+    %meta{"http-equiv" => "Content-type", :content => "text/html; charset=utf-8"}
+    %title= Page Title
+    = stylesheet_link_tag :flutie, 'screen', :media => 'all', :cache => true
+    = javascript_include_tag javascript_include_tag "jquery", "jquery-ui", "prefilled_input", "rails", "application", :cache => true
+    = csrf_meta_tag
+    = include_tiny_mce_if_needed
+    = yield :head
+  %body
+    #container
+      #header
+        = render :partial => 'shared/sign_in_out'
+      #content
+        = render :partial => 'shared/flashes'
+        = yield
+        = render :partial => 'shared/javascript'
+      #footer
+        = render :partial => 'shared/footer'
 }
 
 
@@ -585,16 +710,16 @@ file 'app/views/layouts/application.html.erb',
 # Create RVM file
 #============================================================================
 
-printf "\n"
-msg :info, "Generating rvmrc file"
+section "Generating rvmrc file"
+
 file ".rvmrc", %q{rvm 1.8.7-head}
 
 #============================================================================
 # Set up Git
 #============================================================================
 
-printf "\n"
-msg :info, "Setting up local git repository"
+section "Setting up local git repository"
+
 git :init
 git :add => "."
 git :commit => "-am 'Initial commit.'"
@@ -620,8 +745,8 @@ end
 #============================================================================
 
 unless project_name.blank?
-  printf "\n"
-  msg :info, "Setting up Capistrano configuration for #{STAGING_SERVER_NAME}"
+
+  section "Setting up Capistrano configuration for #{STAGING_SERVER_NAME}"
   capify!
   
   remove_file "config/deploy.rb"
@@ -633,9 +758,6 @@ set :git_enable_submodules, 1
 
 ssh_options[:compression] = false
 ssh_options[:auth_methods] = %w{publickey password keyboard-interactive}
-ssh_options[:forward_agent] = true # Agent forwarding keys
-
-default_run_options[:pty] = true  # Must be set for the password prompt from git to work
 
 role :web,            "#{STAGING_SERVER_NAME}"
 role :app,            "#{STAGING_SERVER_NAME}"
@@ -655,18 +777,6 @@ namespace :bundler do
   end
 end
 
-namespace :deploy do
-  desc "Restarting mod_rails with restart.txt"
-  task :restart, :roles => :app, :except => { :no_release => true } do
-    run "touch \#\{current_path\}/tmp/restart.txt"
-  end
-
-  [:start, :stop].each do |t|
-    desc "\#\{t\} task is a no-op with mod_rails"
-    task t, :roles => :app do ; end
-  end
-end
-
 after 'deploy:setup',         'bundler:install_gem'
 after 'deploy:update_code',   'bundler:bundle_new_release'
 after 'deploy',               'deploy:cleanup'
@@ -680,13 +790,14 @@ end
 #============================================================================
 
 if generate_apache_conf
-  printf "\n"
-  msg :info, "Generating Apache configuration file."
+  section "Generating Apache configuration file."
+  
   file "config/apache_config.conf", <<-APACHE_CONF
 <VirtualHost *:80>
-  ServerName #{project_name.gsub('_', '-')}.taylored-software.com
+  ServerName #{project_name}.taylored-software.com
   DocumentRoot #{REMOTE_APACHE_DIR}/#{project_name}.taylored-software.com/current/public
 
+  CustomLog #{REMOTE_APACHE_DIR}/#{project_name}.taylored-software.com/current/log/apache_access_log "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"" 
   ErrorLog #{REMOTE_APACHE_DIR}/#{project_name}.taylored-software.com/current/log/apache_error_log
 
   RailsSpawnMethod smart
@@ -724,6 +835,7 @@ end
 # Done.
 #============================================================================
 
+printf "\n"
 printf "======================================================================\n".cyan.bold
 printf "Done!\n".cyan.bold
 printf "======================================================================\n".cyan.bold
