@@ -1,0 +1,29 @@
+#!/usr/bin/env ruby
+
+require File.expand_path(File.dirname(__FILE__) + "/../lib/create")
+require File.expand_path(File.dirname(__FILE__) + "/../lib/errors")
+
+require 'rubygems'
+require 'rails'
+require 'colored'
+require 'net/http'
+require 'net/ssh'
+
+include TSWRails::Errors
+
+def usage
+  "Usage: #{File.basename(__FILE__)} create new_project_name"
+end
+
+case ARGV[0]
+when 'create', '--create'
+  begin
+    TSWRails::Create.run!(ARGV[1])
+  rescue TSWRails::InvalidInput => e
+    error_with_message(e.message)
+  end
+when 'help', '--help'
+  puts usage
+else
+  error_with_message "Unknown subcommand: #{ARGV[0]}\n#{usage}"
+end

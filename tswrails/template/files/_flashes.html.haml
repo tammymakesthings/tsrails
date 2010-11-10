@@ -1,0 +1,10 @@
+#flashes
+  - if flash[:notice]
+    #flash_notice
+      %p= flash[:notice]
+  - if flash[:error]
+    #flash_error
+      %p= flash[:error]
+  - if flash[:info]
+    #flash_info
+      %p= flash[:info]

@@ -1,0 +1,16 @@
+#
+# Here you can specify default options for TinyMCE across all controllers
+#
+theme: advanced
+theme_advanced_resizing: true
+theme_advanced_toolbar_location: "top"
+theme_advanced_statusbar_location: "bottom"
+theme_advanced_buttons3_add: "pastetext,pasteword,selectall"
+paste_auto_cleanup_on_paste: true
+relative_urls: false
+remove_script_host: false
+convert_urls: false
+plugins:
+- table
+- fullscreen
+- paste
