@@ -3,8 +3,8 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.rubygems_version = '1.3.5'
 
-  s.name              = 'tswrails'
-  s.version           = '0.1.0.beta.1'
+  s.name              = 'tsrails'
+  s.version           = '1.0.0'
   s.date              = '2010-11-10'
 
   s.summary     = "Generate a Rails app using Taylored Software's best practices."
@@ -17,8 +17,8 @@ Taylored Software to get a jump start on a working app.
   s.email    = 'rubygems@taylored-software.com'
   s.homepage = 'http://github.com/tayloredsoftware/tswrails'
 
-  s.executables = ["tswrails"]
-  s.default_executable = 'tswrails'
+  s.executables = ["tsrails"]
+  s.default_executable = 'tsrails'
 
   s.rdoc_options = ["--charset=UTF-8"]
   s.extra_rdoc_files = %w[README.md LICENSE]
@@ -41,6 +41,7 @@ Taylored Software to get a jump start on a working app.
     template/files/_javascript.html.haml
     template/files/_sign_in_out.html.haml
     template/files/apache_config.conf
+    template/files/app_config.yml
     template/files/application.html.haml
     template/files/application_helper.rb
     template/files/backtrace_silencers.rb

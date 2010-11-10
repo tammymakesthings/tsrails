@@ -9,7 +9,7 @@ require 'colored'
 require 'net/http'
 require 'net/ssh'
 
-include TSWRails::Errors
+include TSRails::Errors
 
 def usage
   "Usage: #{File.basename(__FILE__)} create new_project_name"
@@ -18,8 +18,8 @@ end
 case ARGV[0]
 when 'create', '--create'
   begin
-    TSWRails::Create.run!(ARGV[1])
-  rescue TSWRails::InvalidInput => e
+    TSRails::Create.run!(ARGV[1])
+  rescue TSRails::InvalidInput => e
     error_with_message(e.message)
   end
 when 'help', '--help'
