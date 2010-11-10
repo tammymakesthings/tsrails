@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require File.expand_path(File.dirname(__FILE__) + "/../lib/create")
+require File.expand_path(File.dirname(__FILE__) + "/../lib/constants")
 require File.expand_path(File.dirname(__FILE__) + "/../lib/errors")
 
 require 'rubygems'
@@ -16,14 +17,14 @@ def usage
 end
 
 case ARGV[0]
-when 'create', '--create'
-  begin
-    TSRails::Create.run!(ARGV[1])
-  rescue TSRails::InvalidInput => e
-    error_with_message(e.message)
-  end
-when 'help', '--help'
-  puts usage
-else
-  error_with_message "Unknown subcommand: #{ARGV[0]}\n#{usage}"
+  when 'create', '--create', 'new', '--new'
+    begin
+      TSRails::Create.run!(ARGV[1])
+    rescue TSRails::InvalidInput => e
+      error_with_message(e.message)
+    end
+  when 'help', '--help'
+    puts usage
+  else
+    error_with_message "Unknown subcommand: #{ARGV[0]}\n#{usage}"
 end

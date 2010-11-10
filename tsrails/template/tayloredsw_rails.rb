@@ -282,7 +282,7 @@ run "git push origin master"
 # Set up Capistrano configuration
 #============================================================================
 
-section "Setting up Capistrano configuration for #{STAGING_SERVER_NAME}"
+section "Setting up Capistrano configuration for #{TSRails::Constants.get(:staging_server)}"
 capify!
 
 remove_file "config/deploy.rb"

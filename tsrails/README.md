@@ -15,7 +15,11 @@ To create a new project first install suspenders:
 
 Then run:
 
-  suspenders create tsrails
+  tsrails create projectname
+
+or:
+
+	tsrails new projectname
 
 This will create a project in `projectname', and will check it into version
 control (Git) using the settings specified in the configuration file (see
@@ -65,21 +69,30 @@ Included Gems
 TSRails includes the following gems in the generated application along with
 their associated configuration files:
 
-- Clearance
-- HAML
-- Paperclip
-- Hpricot
-- tiny_mce
-- RedCloth
-- WillPaginate
-- Mongrel
-- Capistrano
-- Nokogiri
-- exception_notification
-- formtastic
-- Heroku
-- SQLite3 and MySQL (MySQL is only enabled in the production environment)
-- Ryan Bates's +nifty-generators+
+- **User Login and Authentication**
+	- Clearance
+- **Template and Markup Processing**
+	- HAML
+	- RedCloth
+- **Form Enhancements**
+	- Paperclip
+	- tiny_mce
+	- flutie
+	- formtastic
+- **View Enhancements**
+	- WillPaginate
+- **Application Infrastructure**
+	- Hpricot
+	- exception_notification
+	- Nokogiri
+	- Ryan Bates's +nifty-generators+
+- **Database Adapters**
+	- SQLite3 (development and test environments)
+	- MySQL (production environment)
+- **Deployment**
+	- Capistrano
+	- Heroku
+	- Mongrel and mongrel_cluster
 
 TSRails also includes the following BDD/testing tools:
 
@@ -105,7 +118,8 @@ Initializers (in config/initializers)
 Version History
 ---------------
 
-- Version 1.0.4 - 2010 Nov 10 - Added configuration file
-- Version 1.0.3 - 2010 Nov 10 - Initial public version
+- 1.0.5 - 2010 Nov 10 - Fixed a template bug and updated the readme
+- 1.0.4 - 2010 Nov 10 - Added configuration file
+- 1.0.3 - 2010 Nov 10 - Initial public version
 
 [Taylored Software]: http://www.taylored-software.com
