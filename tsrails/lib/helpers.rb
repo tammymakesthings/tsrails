@@ -1,3 +1,9 @@
+require 'rubygems'
+require 'rails'
+require 'colored'
+require 'net/http'
+require 'net/ssh'
+
 #============================================================================
 # Helper functions
 #============================================================================
@@ -38,11 +44,11 @@ def remote_dir_exists?(hostname, username, dir_path)
 end
 
 def git_name_taken?(project_name)
-  remote_dir_exists?(STAGING_SERVER_NAME, STAGING_SSH_USER, "#{REMOTE_GIT_DIR}/#{project_name}.git")
+  remote_dir_exists?(TSRails::Constants.get(:staging_server), TSRails::Constants.get(:staging_ssh_user), "#{TSRails::Constants.get(:remote_git_dir)}/#{project_name}.git")
 end
 
 def apache_name_taken?(project_name)
-  remote_dir_exists?(STAGING_SERVER_NAME, STAGING_SSH_USER, "#{REMOTE_APACHE_DIR}/#{project_name}.taylored-software.com")
+  remote_dir_exists?(TSRails::Constants.get(:staging_server), TSRails::Constants.get(:staging_ssh_user), "#{TSRails::Constants.get(:remote_apache_dir)}/#{project_name}.taylored-software.com")
 end
 
 def concat_file(source, destination)
@@ -72,7 +78,7 @@ def section(descr)
   msg :info, descr
 end
 
-def replace_file(filename, content)
+def replace_file (filename, content)
   remove_file filename
   file filename, content
 end

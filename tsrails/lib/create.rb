@@ -11,7 +11,7 @@ require 'colored'
 require 'net/http'
 require 'net/ssh'
 
-module TSWRails
+module TSRails
   class Create
     attr_accessor :project_path
 

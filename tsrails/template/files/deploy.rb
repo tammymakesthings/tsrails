@@ -1,16 +1,16 @@
 set :scm,                   :git
-set :repository,            "ssh://<%= STAGING_SERVER_NAME %>/<%= REMOTE_GIT_DIR %>/<%= defined_app_name.downcase %>.git"
+set :repository,            "ssh://<%= TSRails::Constants.get(:staging_server) %>/<%= TSRails::Constants.get(:remote_git_dir) %>/<%= defined_app_name.downcase %>.git"
 set :branch,                "master"
 set :git_enable_submodules, 1    
 
 ssh_options[:compression] = false
 ssh_options[:auth_methods] = %w{publickey password keyboard-interactive}
 
-role :web,            "<%= STAGING_SERVER_NAME %>"
-role :app,            "<%= STAGING_SERVER_NAME %>"
-role :db,             "<%= STAGING_SERVER_NAME %>", :primary => true
-set(:deploy_to)       { "<%= REMOTE_APACHE_DIR %>/<%= defined_app_name %>.taylored-software.com" }
-set :user,            "<%= STAGING_SSH_USER %>"
+role :web,            "<%= TSRails::Constants.get(:staging_server) %>"
+role :app,            "<%= TSRails::Constants.get(:staging_server) %>"
+role :db,             "<%= TSRails::Constants.get(:staging_server) %>", :primary => true
+set(:deploy_to)       { "<%= TSRails::Constants.get(:remote_apache_dir) %>/<%= defined_app_name %>.<%= TSRails::Constants.get(:test_app_domain) %>" }
+set :user,            "<%= TSRails::Constants.get(:staging_ssh_user) %>"
 set :use_sudo,        false
 set :keep_releases,   12
 

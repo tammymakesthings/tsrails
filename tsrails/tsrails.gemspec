@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.rubygems_version = '1.3.5'
 
   s.name              = 'tsrails'
-  s.version           = '1.0.0'
+  s.version           = '1.0.4'
   s.date              = '2010-11-10'
 
   s.summary     = "Generate a Rails app using Taylored Software's best practices."
@@ -30,7 +30,7 @@ Taylored Software to get a jump start on a working app.
     LICENSE
     README.md
     Rakefile
-    bin/tswrails
+    bin/tsrails
     lib/constants.rb
     lib/create.rb
     lib/errors.rb
@@ -62,7 +62,7 @@ Taylored Software to get a jump start on a working app.
     template/files/spec_helper.rb
     template/files/tiny_mce.yml
     template/tayloredsw_rails.rb
-    tswrails.gemspec
+    tsrails.gemspec
   ]
   # = MANIFEST =
 end

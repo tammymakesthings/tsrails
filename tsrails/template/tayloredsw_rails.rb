@@ -42,6 +42,7 @@ if client_name.blank?
   msg :notice, "Blank client name specified; using \"Taylored Software\""
   client_name = "Taylored Software"
 end
+@client_name = client_name
 
 printf "\n"
 printf "**********************************************************************\n".magenta
@@ -270,9 +271,9 @@ git :add => "."
 git :commit => "-am 'Initial commit.'"
 
 msg :info, "Setting up remote Git repository"
-run "git remote add origin ssh://#{STAGING_SSH_USER}@#{STAGING_SERVER_NAME}#{REMOTE_GIT_DIR}/#{defined_app_name}.git"
-run "ssh #{STAGING_SERVER_NAME} mkdir #{REMOTE_GIT_DIR}/#{defined_app_name}.git"
-run "ssh #{STAGING_SERVER_NAME} \"cd #{REMOTE_GIT_DIR}/#{defined_app_name}.git ; git --bare init\""
+run "git remote add origin ssh://#{TSRails::Constants.get(:staging_ssh_user)}@#{TSRails::Constants.get(:staging_server)}#{TSRails::Constants.get(:remote_git_dir)}/#{defined_app_name}.git"
+run "ssh #{TSRails::Constants.get(:staging_server)} mkdir #{TSRails::Constants.get(:remote_git_dir)}/#{defined_app_name}.git"
+run "ssh #{TSRails::Constants.get(:staging_server)} \"cd #{TSRails::Constants.get(:remote_git_dir)}/#{defined_app_name}.git ; git --bare init\""
 
 msg :info, "Pushing code to remote Git repository"
 run "git push origin master"

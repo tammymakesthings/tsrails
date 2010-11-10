@@ -15,14 +15,13 @@ gem "flutie"
 gem "dynamic_form"
 gem 'tiny_mce'
 gem "nokogiri"
-gem "exception_notification", 
-  :git => "https://github.com/rails/exception_notification.git", 
+gem "exception_notification",
+  :git => "https://github.com/rails/exception_notification.git",
   :require => 'exception_notifier'
 
 group :development do
   gem "mongrel"
-  gem "capistrano"  
-  gem "yaml_config_file", "~> 0.2.3"  
+  gem "capistrano"
 end
 
 # http://blog.davidchelimsky.net/2010/07/11/rspec-rails-2-generators-and-rake-tasks/
@@ -52,4 +51,4 @@ group :production do
   gem "mysql", "2.8.1"
   gem "mongrel"
   gem "mongrel_cluster"
-end  
+end

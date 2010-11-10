@@ -1,0 +1,11 @@
+development:
+  domain: localhost:3000
+  client_name: <%= @client_name %>
+
+test:
+  domain: test.host
+  client_name: <%= @client_name %>
+
+production:
+  domain: example.com
+  client_name: <%= @client_name %>

@@ -1,6 +1,6 @@
 # User errors
 
-module TSWRails
+module TSRails
   class InvalidInput < Exception; end
 
   module Errors
