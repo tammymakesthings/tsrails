@@ -30,7 +30,6 @@ module TSRails
       exec(<<-COMMAND)
         rails new #{project_path} \
           --template=#{template} \
-          --skip-test-unit \
           --skip-prototype
       COMMAND
     end

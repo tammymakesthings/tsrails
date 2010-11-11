@@ -44,7 +44,7 @@ The configuration file should contain the following keys:
   an Apache/mod_passenger configuration for the test site.
 
 As mentioned above, this configuration file is automatically generated if
-it's not present when +tsrails+ runs. However, the generated configuration
+it's not present when `tsrails` runs. However, the generated configuration
 file is almost certainly incorrect, so tsrails will abort after generating
 a new configuration file to allow you to edit it.
 
@@ -85,7 +85,7 @@ their associated configuration files:
 	- Hpricot
 	- exception_notification
 	- Nokogiri
-	- Ryan Bates's +nifty-generators+
+	- Ryan Bates's `nifty-generators`
 - **Database Adapters**
 	- SQLite3 (development and test environments)
 	- MySQL (production environment)
@@ -106,18 +106,19 @@ TSRails also includes the following BDD/testing tools:
 Initializers (in config/initializers)
 -------------------------------------
 
-- +backtrace_silencers.rb+: Configured to silence backtraces from Shoulda and
+- `backtrace_silencers.rb`: Configured to silence backtraces from Shoulda and
   factory_girl
-- +app_config.rb+: Loads application settings from config/app_config.yml
-- +clearance.rb+: Configuration for Clearance
-- +haml_options.rb+: Configures HAML options
-- +jquery.rb+: Substitutes jQuery for Prototype.JS
-- +noisy_attr_accessible.rb+: Logs protected attribute assignments
-- +requires.rb+: Autoloads libraries in +lib/+ and +lib/extensions+
+- `app_config.rb`: Loads application settings from config/app_config.yml
+- `clearance.rb`: Configuration for Clearance
+- `haml_options.rb`: Configures HAML options
+- `jquery.rb`: Substitutes jQuery for Prototype.JS
+- `noisy_attr_accessible.rb`: Logs protected attribute assignments
+- `requires.rb`: Autoloads libraries in `lib/` and `lib/extensions`
 
 Version History
 ---------------
 
+- 1.0.6 - 2010 Nov 10 - Fixed a bug with autotest failing
 - 1.0.5 - 2010 Nov 10 - Fixed a template bug and updated the readme
 - 1.0.4 - 2010 Nov 10 - Added configuration file
 - 1.0.3 - 2010 Nov 10 - Initial public version

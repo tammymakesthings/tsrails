@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.rubygems_version = '1.3.5'
 
   s.name              = 'tsrails'
-  s.version           = '1.0.5'
+  s.version           = '1.0.6'
   s.date              = '2010-11-10'
 
   s.summary     = "Generate a Rails app using Taylored Software's best practices."
