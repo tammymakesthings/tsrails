@@ -1,8 +1,8 @@
 #
-Dir[File.join(RAILS_ROOT, 'lib', 'extensions', '*.rb')].each do |f|
+Dir[File.join(::Rails.root.to_s, 'lib', 'extensions', '*.rb')].each do |f|
   require f
 end
 
-Dir[File.join(RAILS_ROOT, 'lib', '*.rb')].each do |f|
+Dir[File.join(::Rails.root.to_s, 'lib', '*.rb')].each do |f|
   require f
 end  

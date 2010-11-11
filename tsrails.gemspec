@@ -51,6 +51,7 @@ Taylored Software to get a jump start on a working app.
     template/files/debug_steps.rb
     template/files/deploy.rb
     template/files/dot.rvmrc
+    template/files/env.rb
     template/files/factory_girl_steps.rb
     template/files/haml_options.rb
     template/files/jquery.rb

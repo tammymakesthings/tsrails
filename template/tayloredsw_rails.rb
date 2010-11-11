@@ -233,10 +233,10 @@ generate "formtastic:install"
 section "Generating Clearance files and associated model objects and mocks"
 
 generate "clearance_features"
-# generate :model, "user name:string"
 generate "clearance"
 generate "clearance_views"
 rake "db:migrate"
+rake "db:test:clone"
 
 copy_file "clearance.rb", "config/initializers/clearance.rb", :force => true
 
