@@ -4,8 +4,8 @@ Gem::Specification.new do |s|
   s.rubygems_version = '1.3.5'
 
   s.name              = 'tsrails'
-  s.version           = '1.0.6'
-  s.date              = '2010-11-10'
+  s.version           = '1.1.0'
+  s.date              = '2010-11-11'
 
   s.summary     = "Generate a Rails app using Taylored Software's best practices."
   s.description = <<-HERE
@@ -23,7 +23,7 @@ Taylored Software to get a jump start on a working app.
   s.rdoc_options = ["--charset=UTF-8"]
   s.extra_rdoc_files = %w[README.md LICENSE]
 
-  s.add_dependency('rails', '>= 3.0.0')
+  s.add_dependency('rails', '>= 3.0.1')
 
   # = MANIFEST =
   s.files = %w[
@@ -39,6 +39,7 @@ Taylored Software to get a jump start on a working app.
     template/files/_flashes.html.haml
     template/files/_footer.html.haml
     template/files/_javascript.html.haml
+    template/files/_sidebar.html.haml
     template/files/_sign_in_out.html.haml
     template/files/apache_config.conf
     template/files/app_config.yml

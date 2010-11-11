@@ -118,6 +118,7 @@ Initializers (in config/initializers)
 Version History
 ---------------
 
+- 1.1.0 - 2010 Nov 11 - Fixed various bugs in the code generation
 - 1.0.6 - 2010 Nov 10 - Fixed a bug with autotest failing
 - 1.0.5 - 2010 Nov 10 - Fixed a template bug and updated the readme
 - 1.0.4 - 2010 Nov 10 - Added configuration file

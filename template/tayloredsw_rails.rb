@@ -119,11 +119,11 @@ remove_file "public/javascripts/dragdrop.js"
 remove_file "public/javascripts/effects.js"
 remove_file "public/javascripts/prototype.js"
 
-inside "public/javascripts/jquery" do
+inside "public/javascripts" do
   get_file "http://code.jquery.com/jquery-1.4.3.min.js", "jquery-1.4.3.min.js"
   get_file "https://github.com/rails/jquery-ujs/raw/master/src/rails.js", "rails.js"
 end
-copy_file "prefilled_input.js",  "public/javascripts/jquery/prefilled_input.js"
+copy_file "prefilled_input.js",  "public/javascripts/prefilled_input.js"
 copy_file "jquery.rb", "config/initializers/jquery.rb"
 
 #============================================================================
@@ -200,6 +200,9 @@ copy_file "rcov.opts", "spec/rcov.opts", :force => true
 copy_file "spec.opts", "spec/spec.opts", :force => true
 copy_file "debug_steps.rb", "features/step_definitions/debug_steps.rb"
 
+# Workaround for a bug in Cucumber's monkeypatching of Capybara
+copy_file "env.rb", "features/support/env.rb", :force => true
+
 #============================================================================
 # Install tiny_mce files
 #============================================================================
@@ -230,12 +233,21 @@ generate "formtastic:install"
 section "Generating Clearance files and associated model objects and mocks"
 
 generate "clearance_features"
-generate :model, "user name:string"
-rake "db:migrate"
+# generate :model, "user name:string"
 generate "clearance"
 generate "clearance_views"
+rake "db:migrate"
 
 copy_file "clearance.rb", "config/initializers/clearance.rb", :force => true
+
+#============================================================================
+# Generate compass CSS stuff
+#============================================================================
+
+section "Generating Compass/Blueprint SASS/CSS"
+
+run "compass init rails --using blueprint --sass-dir=app/stylesheets --css-dir=public/stylesheets/compiled/ --quiet"
+run "compass compile"
 
 #============================================================================
 # Generate flashes partial
@@ -249,6 +261,7 @@ copy_file "_flashes.html.haml", 'app/views/shared/_flashes.html.haml'
 copy_file "_javascript.html.haml", 'app/views/shared/_javascript.html.haml'
 template "_footer.html.haml", 'app/views/shared/_footer.html.haml'
 copy_file "_sign_in_out.html.haml", 'app/views/shared/_sign_in_out.html.haml'
+copy_file "_sidebar.html.haml", 'app/views/shared/_sidebar.html.haml'
 
 remove_file 'app/views/layouts/application.html.erb'
 copy_file 'application.html.haml', 'app/views/layouts/application.html.haml'

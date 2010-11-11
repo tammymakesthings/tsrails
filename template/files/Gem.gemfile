@@ -15,6 +15,8 @@ gem "flutie"
 gem "dynamic_form"
 gem 'tiny_mce'
 gem "nokogiri"
+gem 'compass'
+
 gem "exception_notification",
   :git => "https://github.com/rails/exception_notification.git",
   :require => 'exception_notifier'
@@ -45,6 +47,8 @@ group :test, :cucumber do
   gem "treetop"
   gem "shoulda"
   gem "launchy"
+  gem 'ZenTest'
+  gem 'test_notifier'
 end
 
 group :production do
