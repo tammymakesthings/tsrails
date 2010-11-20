@@ -1,10 +1,10 @@
-TSRails is a base Rails project that you can upgrade. It is used by
+**TSRails** is a base Rails project that you can upgrade. It is used by
 [Taylored Software][] as a foundation for their Rails development
 efforts.
 
-TSRails is based upon the excellent [suspenders][] gem from [thoughtbot][],
-extended and modified to include other setup tasks commonly performed in
-Taylored Software's Rails environment.
+**TSRails** is based upon the excellent [suspenders][] gem from
+[thoughtbot][], extended and modified to include other setup tasks commonly
+performed in Taylored Software's Rails environment.
 
 Using TSRails
 -------------
@@ -28,7 +28,7 @@ below.)
 Configuration
 =============
 
-The TSRails gem requires several configuration options which define things
+The **TSRails** gem requires several configuration options which define things
 like the staging server, Git username, etc. THese are defined in a
 configuration file, ~/.tsrails.yml, which is automatically generated if it
 is not present.
@@ -43,19 +43,19 @@ The configuration file should contain the following keys:
 - **test_app_domain** - The domain of the remote server (used for generating
   an Apache/mod_passenger configuration for the test site.
 
-As mentioned above, this configuration file is automatically generated if
-it's not present when `tsrails` runs. However, the generated configuration
-file is almost certainly incorrect, so tsrails will abort after generating
-a new configuration file to allow you to edit it.
+As mentioned above, this configuration file is automatically generated if it's
+not present when `tsrails` runs. However, the generated configuration file is
+almost certainly incorrect, so tsrails will abort after generating a new
+configuration file to allow you to edit it.
 
 About TSRails
 -------------
 
-TSRails was created for use at [Taylored Software][] as a baseline application
+**TSRails** was created for use at [Taylored Software][] as a baseline application
 setup, with reasonable default plugins that the majority (if not all) of our
 applications used, as well as best-practice configuration options.
 
-Although TSRails has been packaged as a general-purpose gem, it does (at
+Although **TSRails** has been packaged as a general-purpose gem, it does (at
 present) make several assumptions that are specific to Taylored Software's
 server configuration and which may not be what you want:
 
@@ -117,8 +117,9 @@ Initializers (in config/initializers)
 
 Version History
 ---------------
-
-- 1.1.1 - 2010 Nov 11 - Prepare test DB after installing Clearance, change `RAILS_ROOT` to  
+- 1.1.2 - 2010 Nov 19 - Change .rvmrc template to use Rails 1.9.2-head, and
+  update a few things in the Gemfile
+- 1.1.1 - 2010 Nov 11 - Prepare test DB after installing Clearance, change `RAILS_ROOT` to
   `::Rails.root.to_s`
 - 1.1.0 - 2010 Nov 11 - Fixed various bugs in the code generation
 - 1.0.6 - 2010 Nov 10 - Fixed a bug with autotest failing
