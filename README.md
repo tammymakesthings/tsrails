@@ -11,7 +11,7 @@ Using TSRails
 
 To create a new project first install tsrails:
 
-  gem install tsrails
+      gem install tsrails
 
 Then run:
 
