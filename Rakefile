@@ -3,7 +3,7 @@ require 'rake'
 require 'cucumber/rake/task'
 require 'date'
 
-TSWRAILS_GEM_VERSION = '1.1.2'
+TSWRAILS_GEM_VERSION = '1.2.0'
 
 #############################################################################
 # Helper functions

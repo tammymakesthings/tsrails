@@ -18,6 +18,15 @@ def msg(message)
   msg :info, message
 end
 
+def ask_with_default(prompt, default_value)
+  msg = "#{prompt} [#{default_value}]"
+  result = ask(msg)
+  if result.nil?
+    result = default_value
+  end
+  result
+end
+
 def msg(mtype, message)
   printf "[".white.bold
   if (mtype.nil?)

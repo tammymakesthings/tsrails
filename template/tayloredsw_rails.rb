@@ -37,11 +37,7 @@ printf "\n"
 # Collect needed information
 #============================================================================
 
-client_name = ask("What is the client name for this project? ")
-if client_name.blank?
-  msg :notice, "Blank client name specified; using \"Taylored Software\""
-  client_name = "Taylored Software"
-end
+client_name = ask_with_default("What is the client name for this project? ", @app_name)
 @client_name = client_name
 
 printf "\n"
@@ -134,7 +130,7 @@ section "Enabling exception_notification"
 run "rails plugin install https://github.com/rails/exception_notification.git"
 exception_notify_config = <<-RUBY
     config.middleware.use ::ExceptionNotifier,
-                          :email_prefix => "[#{defined_app_name.upcase}] ",
+                          :email_prefix => "[#{@app_name}] ",
                           :sender_address => %w{app-errors@taylored-software.com},
                           :exception_recipients => %w{exception-notify@application.com}
 RUBY
@@ -156,9 +152,9 @@ config.action_mailer.raise_delivery_errors = false
 RUBY
 inject_into_class "config/environments/production.rb", "config/environment.rb", production_config
 
-action_mailer_host "development", "#{defined_app_name}.local"
+action_mailer_host "development", "#{@app_name}.local"
 action_mailer_host "test",        "example.com"
-action_mailer_host "production",  "#{defined_app_name}.taylored-software.com"
+action_mailer_host "production",  "#{@app_name}.taylored-software.com"
 
 route "root :to => 'Clearance::Sessions#new'"
 
@@ -284,9 +280,9 @@ git :add => "."
 git :commit => "-am 'Initial commit.'"
 
 msg :info, "Setting up remote Git repository"
-run "git remote add origin ssh://#{TSRails::Constants.get(:staging_ssh_user)}@#{TSRails::Constants.get(:staging_server)}#{TSRails::Constants.get(:remote_git_dir)}/#{defined_app_name}.git"
-run "ssh #{TSRails::Constants.get(:staging_server)} mkdir #{TSRails::Constants.get(:remote_git_dir)}/#{defined_app_name}.git"
-run "ssh #{TSRails::Constants.get(:staging_server)} \"cd #{TSRails::Constants.get(:remote_git_dir)}/#{defined_app_name}.git ; git --bare init\""
+run "git remote add origin ssh://#{TSRails::Constants.get(:staging_ssh_user)}@#{TSRails::Constants.get(:staging_server)}#{TSRails::Constants.get(:remote_git_dir)}/#{@app_name}.git"
+run "ssh #{TSRails::Constants.get(:staging_server)} mkdir #{TSRails::Constants.get(:remote_git_dir)}/#{@app_name}.git"
+run "ssh #{TSRails::Constants.get(:staging_server)} \"cd #{TSRails::Constants.get(:remote_git_dir)}/#{@app_name}.git ; git --bare init\""
 
 msg :info, "Pushing code to remote Git repository"
 run "git push origin master"
@@ -308,7 +304,7 @@ git :commit => "-am 'Added Capistrano configuration from application template'"
 #============================================================================
 
 section "Generating Apache configuration file."
-  
+
 template "apache_config.conf", "config/apache_config.conf"
 
 git :add => "config/apache_config.conf"

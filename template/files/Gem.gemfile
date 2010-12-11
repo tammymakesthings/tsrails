@@ -16,20 +16,19 @@ gem "dynamic_form"
 gem 'tiny_mce'
 gem "nokogiri"
 gem 'compass'
+gem 'acts_as_list'
 
 gem "exception_notification",
   :git => "https://github.com/rails/exception_notification.git",
   :require => 'exception_notifier'
 
 group :development do
-  gem "mongrel", "~> 1.2.0.pre2"
   gem "capistrano"
 end
 
 # http://blog.davidchelimsky.net/2010/07/11/rspec-rails-2-generators-and-rake-tasks/
 group :development, :test, :cucumber do
   gem "rspec-rails", ">= 2.1.0"
-  gem "ruby-debug"
   gem "heroku"
   gem "cucumber-rails"
   gem 'sqlite3-ruby', :require => 'sqlite3'
@@ -51,8 +50,13 @@ group :test, :cucumber do
   gem 'test_notifier'
 end
 
+group :development, :production do
+  gem "mongrel", "~> 1.2.0.pre2"
+  gem 'mongrel_cluster'
+end
+
 group :production do
   gem "mysql", "2.8.1"
-  gem "mongrel", "~> 1.2.0.pre2"
-  gem "mongrel_cluster"
+  gem "pg"
+  gem "dalli"
 end

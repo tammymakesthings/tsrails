@@ -7,5 +7,5 @@ test:
   client_name: <%= @client_name %>
 
 production:
-  domain: example.com
+  domain: <%= @app_name %>.taylored-software.com
   client_name: <%= @client_name %>
