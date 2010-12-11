@@ -21,7 +21,7 @@ or:
 
       tsrails new projectname
 
-This will create a project in `projectname', and will check it into version
+This will create a project in `projectname`, and will check it into version
 control (Git) using the settings specified in the configuration file (see
 below.)
 
