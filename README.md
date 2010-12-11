@@ -9,17 +9,17 @@ performed in Taylored Software's Rails environment.
 Using TSRails
 -------------
 
-To create a new project first install suspenders:
+To create a new project first install tsrails:
 
   gem install tsrails
 
 Then run:
 
-  tsrails create projectname
+      tsrails create projectname
 
 or:
 
-	tsrails new projectname
+      tsrails new projectname
 
 This will create a project in `projectname', and will check it into version
 control (Git) using the settings specified in the configuration file (see
@@ -117,6 +117,8 @@ Initializers (in config/initializers)
 
 Version History
 ---------------
+- 1.2.0 - 2010 Dec 11 - Replaced `defined_app_name` with `@app_name` throughout,
+  added `ask_with_default` helper, various fixes for Ruby 1.9.2 compatibility
 - 1.1.2 - 2010 Nov 19 - Change .rvmrc template to use Rails 1.9.2-head, and
   update a few things in the Gemfile
 - 1.1.1 - 2010 Nov 11 - Prepare test DB after installing Clearance, change `RAILS_ROOT` to
@@ -127,4 +129,6 @@ Version History
 - 1.0.4 - 2010 Nov 10 - Added configuration file
 - 1.0.3 - 2010 Nov 10 - Initial public version
 
-[Taylored Software]: http://www.taylored-software.com
+[Taylored Software]: http://www.taylored-software.com/
+[thoughtbot]: http://www.thoughtbot.com/
+[suspenders]: https://github.com/thoughtbot/suspenders
