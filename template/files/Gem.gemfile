@@ -17,6 +17,7 @@ gem 'tiny_mce'
 gem "nokogiri"
 gem 'compass'
 gem 'acts_as_list'
+gem 'jquery-rails'
 
 gem "exception_notification",
   :git => "https://github.com/rails/exception_notification.git",

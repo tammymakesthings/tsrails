@@ -109,18 +109,8 @@ copy_file "haml_options.rb", "config/initializers/haml_options.rb"
 #============================================================================
 
 section "Changing Javascript library from script.aculo.us to jQuery"
-
-remove_file "public/javascripts/controls.js"
-remove_file "public/javascripts/dragdrop.js"
-remove_file "public/javascripts/effects.js"
-remove_file "public/javascripts/prototype.js"
-
-inside "public/javascripts" do
-  get_file "http://code.jquery.com/jquery-1.4.3.min.js", "jquery-1.4.3.min.js"
-  get_file "https://github.com/rails/jquery-ujs/raw/master/src/rails.js", "rails.js"
-end
 copy_file "prefilled_input.js",  "public/javascripts/prefilled_input.js"
-copy_file "jquery.rb", "config/initializers/jquery.rb"
+generate "jquery:install", "--ui --version=1.4.4"
 
 #============================================================================
 # Exception Notification stuff

@@ -30,7 +30,8 @@ module TSRails
       exec(<<-COMMAND)
         rails new #{project_path} \
           --template=#{template} \
-          --skip-prototype
+          --skip-prototype \
+          --skip-test-unit
       COMMAND
     end
 
@@ -45,7 +46,7 @@ module TSRails
         raise InvalidInput.new("Project name \"#{project_name}\" already taken in Git")
       end
       if apache_name_taken?(project_name)
-        raise InvalidInput.new("Project name \"#{project_name}\" already taken in Apache")        
+        raise InvalidInput.new("Project name \"#{project_name}\" already taken in Apache")
       end
     end
 
