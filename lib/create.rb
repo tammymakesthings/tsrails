@@ -62,7 +62,7 @@ module TSRails
     end
 
     def template
-      File.expand_path(File.dirname(__FILE__) + "/../template/tayloredsw_rails.rb")
+      File.expand_path(File.join(File.dirname(__FILE__), "..", "template", "tsrails_3_2.rb"))
     end
   end
 end

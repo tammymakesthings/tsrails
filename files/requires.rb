@@ -1,4 +1,3 @@
-#
 Dir[File.join(::Rails.root.to_s, 'lib', 'extensions', '*.rb')].each do |f|
   require f
 end

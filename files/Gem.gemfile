@@ -1,0 +1,56 @@
+source 'http://rubygems.org'
+
+gem 'rake', '0.9.2'
+
+gem 'rails', '3.2.0'
+gem 'sqlite3'
+gem 'bcrypt-ruby', '~> 3.0.0'
+gem 'meta_search',    '>= 1.1.0.pre'
+gem 'clearance'
+gem 'therubyracer'
+
+gem 'kaminari'
+gem 'haml'
+gem 'haml-rails', :group => :development
+gem 'simple_form'
+gem 'jquery-rails'
+gem 'prawn'
+gem 'activemerchant'
+gem 'draper'
+
+group :development do
+  gem 'growl'
+  gem 'thin'
+end
+
+group :development, :test do
+  gem 'rb-fsevent', :require => false if RUBY_PLATFORM =~ /darwin/i
+  gem 'rails3-generators'
+  gem 'annotate'
+  gem 'spork', '>= 0.9.0.rc'
+  gem 'guard'
+  gem 'guard-bundler'
+  gem 'guard-coffeescript'
+  gem 'guard-rspec'
+  gem 'guard-sass'
+  gem 'guard-spork'
+  gem 'guard-rails'
+  gem 'guard-annotate'
+  gem 'simplecov', :require => false
+end
+
+group :test do
+  gem 'database_cleaner'
+  gem 'rails3-generators' #mainly for factory_girl & simple_form at this point
+  gem 'rspec-rails'
+  gem 'factory_girl_rails'
+  gem 'capybara'
+  gem 'launchy'
+  gem 'shoulda', '>= 3.0.0.beta'
+end
+
+group :assets do
+  gem 'sass-rails', "  ~> 3.2.3"
+  gem 'coffee-rails', "~> 3.2.1"
+  gem 'uglifier', '>= 1.0.3'
+end

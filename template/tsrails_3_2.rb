@@ -1,5 +1,5 @@
 ############################################################################
-# TAYLORED SOFTWARE RAILS APPLICATION TEMPLATE GEM V1.0                    #
+# TAYLORED SOFTWARE RAILS APPLICATION TEMPLATE GEM V2.0                    #
 ############################################################################
 
 require 'rubygems'
@@ -15,8 +15,8 @@ source_paths << File.join(template_root, "files")
 # Global configuration
 #============================================================================
 
-require File.expand_path("#{File.dirname(__FILE__)}/../lib/constants.rb")
-require File.expand_path("#{File.dirname(__FILE__)}/../lib/helpers.rb")
+require File.expand_path(File.join(template_root, "lib", "constants.rb"))
+require File.expand_path(File.join(template_root, "lib", "helpers.rb"))
 
 #============================================================================
 # Startup
@@ -51,6 +51,16 @@ printf "* should be required to finish generating the application.           *\n
 printf "**********************************************************************\n".magenta
 
 #============================================================================
+# RVM
+#============================================================================
+
+section "Making an RVM gemset for #{@app_name}"
+run "rvm use 1.9.3"
+run "rvm gemset create #{@app_name}"
+run "rvm gemset use #{@app_name}"
+run "echo \"rvm ruby-1.9.3@#{@app_name}\" > .rvmrc"
+
+#============================================================================
 # Remove unneeded files
 #============================================================================
 
@@ -65,8 +75,10 @@ remove_file "public/images/rails.png"
 empty_directory_with_gitkeep "app/models"
 empty_directory_with_gitkeep "db/migrate"
 empty_directory_with_gitkeep "log"
-empty_directory_with_gitkeep "public/images"
 empty_directory_with_gitkeep "spec/support"
+empty_directory_with_gitkeep "spec/routing"
+empty_directory_with_gitkeep "spec/models"
+empty_directory_with_gitkeep "spec/requests"
 
 #============================================================================
 # Add gems
@@ -75,16 +87,7 @@ empty_directory_with_gitkeep "spec/support"
 section "Adding Ruby gems (this may take a while)"
 
 copy_file "Gem.gemfile", "Gemfile", :force => true
-run "bundle install"
-
-#============================================================================
-# Create the config_file initializer
-#============================================================================
-
-section "Adding initializer for app_config file"
-generate "nifty:config"
-remove_file "config/app_config.yml"
-template "app_config.yml", "config/app_config.yml"
+run "bundle install --binstubs"
 
 #============================================================================
 # Set up database
@@ -92,39 +95,16 @@ template "app_config.yml", "config/app_config.yml"
 
 section "Creating databases"
 
-rake "db:create"
-rake "db:migrate"
-rake "db:test:prepare"
+run "bundle exec rake db:create"
+run "bundle exec rake db:migrate"
+run "bundle exec rake db:test:clone"
 
 #============================================================================
 # HAML stuff
 #============================================================================
 
 section "Enabling HAML templates"
-run "rails plugin install git://github.com/pjb3/rails3-generators.git"
 copy_file "haml_options.rb", "config/initializers/haml_options.rb"
-
-#============================================================================
-# Install jQuery
-#============================================================================
-
-section "Changing Javascript library from script.aculo.us to jQuery"
-copy_file "prefilled_input.js",  "public/javascripts/prefilled_input.js"
-generate "jquery:install", "--ui --version=1.4.4"
-
-#============================================================================
-# Exception Notification stuff
-#============================================================================
-
-section "Enabling exception_notification"
-run "rails plugin install https://github.com/rails/exception_notification.git"
-exception_notify_config = <<-RUBY
-    config.middleware.use ::ExceptionNotifier,
-                          :email_prefix => "[#{@app_name}] ",
-                          :sender_address => %w{app-errors@taylored-software.com},
-                          :exception_recipients => %w{exception-notify@application.com}
-RUBY
-inject_into_class "config/application.rb", "Application", exception_notify_config
 
 #============================================================================
 # Extra app configuration tweaks
@@ -149,91 +129,42 @@ action_mailer_host "production",  "#{@app_name}.taylored-software.com"
 route "root :to => 'Clearance::Sessions#new'"
 
 generators_config = <<-RUBY
-    config.generators do |generate|
-      generate.test_framework :rspec
-      generate.fixture_replacement :factory_girl, :dir => "spec/factories"
-      generate.template_engine :haml
-    end
+  config.generators do |g|
+    g.test_framework :rspec, :views => false, :fixture => true
+    g.fixture_replacement :factory_girl, :dir => 'spec/factories'
+    g.form_builder :simple_form
+    g.template_engine :haml
+  end
 RUBY
+
 inject_into_class "config/application.rb", "Application", generators_config
+
 copy_file "application_helper.rb", "app/helpers/application_helper.rb", :force => true
 copy_file "requires.rb", "config/initializers/requires.rb"
 copy_file "noisy_attr_accessible.rb", "config/initializers/noisy_attr_accessible.rb"
-
 copy_file "backtrace_silencers.rb", "config/initializers/backtrace_silencers.rb", :force => true
-
-#============================================================================
-# Mongrel configuration
-#============================================================================
-
-section "Setting up mongrel_cluster"
-copy_file "mongrel_cluster.yml", "config/mongrel_cluster.yml"
 
 #============================================================================
 # Generate rspec and cucumber stuff
 #============================================================================
 
-section "Setting up RSpec and Cucumber"
+section "Setting up RSpec/Spork/Guard"
 
 generate "rspec:install"
-generate "cucumber:install", "--rspec --capybara"
-
-copy_file "factory_girl_steps.rb", "features/step_definitions/factory_girl_steps.rb"
-template "cucumber.yml", "config/initializers/cucumber.yml"
 
 copy_file "spec_helper.rb", "spec/spec_helper.rb", :force => true
 copy_file "rcov.opts", "spec/rcov.opts", :force => true
 copy_file "spec.opts", "spec/spec.opts", :force => true
-copy_file "debug_steps.rb", "features/step_definitions/debug_steps.rb"
+copy_file "mailer_macros.rb", "spec/support/mailer_macros.rb", force: true
+copy_file "Guardfile", "Guardfile", force: true
 
-# Workaround for a bug in Cucumber's monkeypatching of Capybara
-copy_file "env.rb", "features/support/env.rb", :force => true
-
-#============================================================================
-# Install tiny_mce files
-#============================================================================
-
-section "Installing files needed by tiny_mce"
-
-rake "tiny_mce:install"
-copy_file "tiny_mce.yml", "config/tiny_mce.yml", :force => true
-
-#============================================================================
-# Install flutie files
-#============================================================================
-
-section "Installing Flutie files"
-rake "flutie:install"
 
 #============================================================================
 # Install Formtastic stuff
 #============================================================================
 
-section "Installing Formtastic files"
-generate "formtastic:install"
-
-#============================================================================
-# Generate Clearance stuff
-#============================================================================
-
-section "Generating Clearance files and associated model objects and mocks"
-
-generate "clearance_features"
-generate "clearance"
-generate "clearance_views"
-rake "db:migrate"
-rake "db:test:clone"
-
-copy_file "clearance.rb", "config/initializers/clearance.rb", :force => true
-
-#============================================================================
-# Generate compass CSS stuff
-#============================================================================
-
-section "Generating Compass/Blueprint SASS/CSS"
-
-run "compass init rails --using blueprint --sass-dir=app/stylesheets --css-dir=public/stylesheets/compiled/ --quiet"
-run "compass compile"
+section "Installing SimpleForm files"
+generate "simple_form:install"
 
 #============================================================================
 # Generate flashes partial
@@ -253,13 +184,6 @@ remove_file 'app/views/layouts/application.html.erb'
 copy_file 'application.html.haml', 'app/views/layouts/application.html.haml'
 
 #============================================================================
-# Create RVM file
-#============================================================================
-
-section "Generating rvmrc file"
-copy_file "dot.rvmrc", ".rvmrc"
-
-#============================================================================
 # Set up Git
 #============================================================================
 
@@ -269,25 +193,20 @@ git :init
 git :add => "."
 git :commit => "-am 'Initial commit.'"
 
-msg :info, "Setting up remote Git repository"
-run "git remote add origin ssh://#{TSRails::Constants.get(:staging_ssh_user)}@#{TSRails::Constants.get(:staging_server)}#{TSRails::Constants.get(:remote_git_dir)}/#{@app_name}.git"
-run "ssh #{TSRails::Constants.get(:staging_server)} mkdir #{TSRails::Constants.get(:remote_git_dir)}/#{@app_name}.git"
-run "ssh #{TSRails::Constants.get(:staging_server)} \"cd #{TSRails::Constants.get(:remote_git_dir)}/#{@app_name}.git ; git --bare init\""
+#msg :info, "Setting up remote Git repository"
+#run "git remote add origin ssh://#{TSRails::Constants.get(:staging_ssh_user)}@#{TSRails::Constants.get(:staging_server)}#{TSRails::Constants.get(:remote_git_dir)}/#{@app_name}.git"
+#run "ssh #{TSRails::Constants.get(:staging_server)} mkdir #{TSRails::Constants.get(:remote_git_dir)}/#{@app_name}.git"
+#run "ssh #{TSRails::Constants.get(:staging_server)} \"cd #{TSRails::Constants.get(:remote_git_dir)}/#{@app_name}.git ; git --bare init\""
 
-msg :info, "Pushing code to remote Git repository"
-run "git push origin master"
+#msg :info, "Pushing code to remote Git repository"
+#run "git push origin master"
 
 #============================================================================
-# Set up Capistrano configuration
+# Set up Consular Termfile
 #============================================================================
 
-section "Setting up Capistrano configuration for #{TSRails::Constants.get(:staging_server)}"
-capify!
-
-remove_file "config/deploy.rb"
-template "deploy.rb", "config/deploy.rb"
-
-git :commit => "-am 'Added Capistrano configuration from application template'"
+section "Setting up Termfile for Consular"
+template "Termfile", "Termfile"
 
 #============================================================================
 # Generate/Install Apache Configuration File

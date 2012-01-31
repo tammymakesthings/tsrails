@@ -1,0 +1,37 @@
+FILE_BASE = "/Users/tlcravit/code/<%= @app_name %>"
+
+window do
+  before { run "cd #{FILE_BASE}" }
+
+  run "mate ."
+  run "tab_title 'shell (bash)'"
+
+  tab "server" do
+    run "tab_title 'server (thin)'"
+    run "bundle exec thin start"
+  end
+
+  if File.exist?("#{FILE_BASE}/Guardfile")
+    tab "guard" do
+      run "tab_title 'guard'"
+      run "guard"
+    end
+  end
+
+  if File.exist?("#{FILE_BASE}/logs/development.log")
+    tab "log" do
+      run "tab_title 'development log'"
+      run "tail -f \"#{FILE_BASE}/logs/development.log\""
+    end
+  end
+
+  tab "console" do
+    run "tab_title 'console (pry)'"
+    run "pry -r ./config/environment"
+  end
+
+  tab "shell" do
+    run "tab_title 'shell (bash)'"
+    run "/usr/local/bin/bash --login"
+  end
+end
