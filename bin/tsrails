@@ -18,10 +18,14 @@ end
 
 case ARGV[0]
   when 'create', '--create', 'new', '--new'
-    begin
-      TSRails::Create.run!(ARGV[1])
-    rescue TSRails::InvalidInput => e
-      error_with_message(e.message)
+    if ARGV[1].nil?
+      puts usage
+    else
+      begin
+        TSRails::Create.run!(ARGV[1])
+      rescue TSRails::InvalidInput => e
+        error_with_message(e.message)
+      end
     end
   when 'help', '--help'
     puts usage

@@ -4,8 +4,8 @@ Gem::Specification.new do |s|
   s.rubygems_version = '1.3.5'
 
   s.name              = 'tsrails'
-  s.version           = '1.2.3'
-  s.date              = '2011-01-11'
+  s.version           = '2.0.0'
+  s.date              = '2012-01-30'
 
   s.summary     = "Generate a Rails app using Taylored Software's best practices."
   s.description = <<-HERE
@@ -23,7 +23,8 @@ Taylored Software to get a jump start on a working app.
   s.rdoc_options = ["--charset=UTF-8"]
   s.extra_rdoc_files = %w[README.md LICENSE]
 
-  s.add_dependency('rails', '>= 3.0.1')
+  s.add_dependency('rails', '>= 3.2.0')
+  s.add_dependency('colored', "~> 1.2")
 
   # = MANIFEST =
   s.files = %w[
@@ -36,6 +37,8 @@ Taylored Software to get a jump start on a working app.
     lib/errors.rb
     lib/helpers.rb
     template/files/Gem.gemfile
+    template/files/Guardfile
+    template/files/Termfile
     template/files/_flashes.html.haml
     template/files/_footer.html.haml
     template/files/_javascript.html.haml
@@ -49,12 +52,11 @@ Taylored Software to get a jump start on a working app.
     template/files/clearance.rb
     template/files/cucumber.yml
     template/files/debug_steps.rb
-    template/files/deploy.rb
-    template/files/dot.rvmrc
     template/files/env.rb
     template/files/factory_girl_steps.rb
     template/files/haml_options.rb
     template/files/jquery.rb
+    template/files/mailer_macros.rb
     template/files/mongrel_cluster.yml
     template/files/noisy_attr_accessible.rb
     template/files/prefilled_input.js
@@ -63,7 +65,7 @@ Taylored Software to get a jump start on a working app.
     template/files/spec.opts
     template/files/spec_helper.rb
     template/files/tiny_mce.yml
-    template/tayloredsw_rails.rb
+    template/tsrails_3_2.rb
     tsrails.gemspec
   ]
   # = MANIFEST =

@@ -15,8 +15,8 @@ source_paths << File.join(template_root, "files")
 # Global configuration
 #============================================================================
 
-require File.expand_path(File.join(template_root, "lib", "constants.rb"))
-require File.expand_path(File.join(template_root, "lib", "helpers.rb"))
+require File.expand_path(File.join(template_root, "..", "lib", "constants.rb"))
+require File.expand_path(File.join(template_root, "..", "lib", "helpers.rb"))
 
 #============================================================================
 # Startup
@@ -55,7 +55,7 @@ printf "**********************************************************************\n
 #============================================================================
 
 section "Making an RVM gemset for #{@app_name}"
-run "rvm use 1.9.3"
+run "rvm 1.9.3"
 run "rvm gemset create #{@app_name}"
 run "rvm gemset use #{@app_name}"
 run "echo \"rvm ruby-1.9.3@#{@app_name}\" > .rvmrc"

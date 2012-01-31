@@ -1,9 +1,8 @@
 require 'rubygems'
 require 'rake'
-require 'cucumber/rake/task'
 require 'date'
 
-TSRAILS_GEM_VERSION = '1.2.3'
+TSRAILS_GEM_VERSION = '2.0.0'
 
 #############################################################################
 # Helper functions

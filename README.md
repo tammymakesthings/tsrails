@@ -99,7 +99,6 @@ TSRails also includes the following BDD/testing tools:
 - factory_girl
 - RSpec
 - Shoulda
-- Cucumber
 - capybara
 - Timecop
 
@@ -118,6 +117,7 @@ Initializers (in config/initializers)
 Version History
 ---------------
 
+- 2.0.0 - 2012 Jan 30 - Updated for Rails 3.2
 - 1.2.2 - 2011 Jan 11 - Using jquery-rails gem instead of doing the heavy lifting ourselves
 - 1.2.1 - 2010 Dec 19 - Replaced RVM Ruby 1.9.2-head with REE 1.8.7-head
 - 1.2.0 - 2010 Dec 11 - Replaced `defined_app_name` with `@app_name` throughout,
