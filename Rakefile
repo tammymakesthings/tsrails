@@ -2,7 +2,7 @@ require 'rubygems'
 require 'rake'
 require 'date'
 
-TSRAILS_GEM_VERSION = '2.0.1'
+TSRAILS_GEM_VERSION = '2.0.2'
 
 #############################################################################
 # Helper functions
