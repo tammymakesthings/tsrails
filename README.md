@@ -117,6 +117,7 @@ Initializers (in config/initializers)
 Version History
 ---------------
 
+- 2.0.1 - 2012 Feb 23 - Modified template file to more easily change Ruby versions
 - 2.0.0 - 2012 Jan 30 - Updated for Rails 3.2
 - 1.2.2 - 2011 Jan 11 - Using jquery-rails gem instead of doing the heavy lifting ourselves
 - 1.2.1 - 2010 Dec 19 - Replaced RVM Ruby 1.9.2-head with REE 1.8.7-head

@@ -10,6 +10,7 @@ require 'net/ssh'
 
 template_root = File.expand_path(File.join(File.dirname(__FILE__)))
 source_paths << File.join(template_root, "files")
+ruby_version = "1.9.3"
 
 #============================================================================
 # Global configuration
@@ -55,10 +56,10 @@ printf "**********************************************************************\n
 #============================================================================
 
 section "Making an RVM gemset for #{@app_name}"
-run "rvm 1.9.3"
+run "rvm #{ruby_version}"
 run "rvm gemset create #{@app_name}"
 run "rvm gemset use #{@app_name}"
-run "echo \"rvm ruby-1.9.3@#{@app_name}\" > .rvmrc"
+run "echo \"rvm ruby-#{ruby_version}@#{@app_name}\" > .rvmrc"
 
 #============================================================================
 # Remove unneeded files
