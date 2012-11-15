@@ -1,10 +1,10 @@
 source 'http://rubygems.org'
 
-gem 'rake', '0.9.2'
+gem 'rake'
 
-gem 'rails', '3.2.1'
+gem 'rails'
 gem 'sqlite3'
-gem 'bcrypt-ruby', '~> 3.0.0'
+gem 'bcrypt-ruby', '>= 3.0.0'
 gem 'meta_search',    '>= 1.1.0.pre'
 gem 'clearance'
 gem 'therubyracer'
@@ -27,7 +27,7 @@ group :development, :test do
   gem 'rb-fsevent', :require => false if RUBY_PLATFORM =~ /darwin/i
   gem 'rails3-generators'
   gem 'annotate'
-  gem 'spork', '>= 0.9.0.rc'
+  gem 'spork'
   gem 'guard'
   gem 'guard-bundler'
   gem 'guard-coffeescript'
@@ -46,11 +46,11 @@ group :test do
   gem 'factory_girl_rails'
   gem 'capybara'
   gem 'launchy'
-  gem 'shoulda', '>= 3.0.0.beta'
+  gem 'shoulda'
 end
 
 group :assets do
-  gem 'sass-rails', "  ~> 3.2.3"
-  gem 'coffee-rails', "~> 3.2.1"
-  gem 'uglifier', '>= 1.0.3'
+  gem 'sass-rails'
+  gem 'coffee-rails'
+  gem 'uglifier'
 end

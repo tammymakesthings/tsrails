@@ -117,6 +117,7 @@ Initializers (in config/initializers)
 Version History
 ---------------
 
+- 2.0.3 - 2012 Nov 15 - Modified to remove RVM integration since we're using rbenv now
 - 2.0.2 - 2012 Feb 23 - Minor release fix
 - 2.0.1 - 2012 Feb 23 - Modified template file to more easily change Ruby versions
 - 2.0.0 - 2012 Jan 30 - Updated for Rails 3.2

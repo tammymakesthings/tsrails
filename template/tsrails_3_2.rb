@@ -8,6 +8,8 @@ require 'colored'
 require 'net/http'
 require 'net/ssh'
 
+DO_RVM = nil
+
 template_root = File.expand_path(File.join(File.dirname(__FILE__)))
 source_paths << File.join(template_root, "files")
 ruby_version = "1.9.3"
@@ -55,11 +57,13 @@ printf "**********************************************************************\n
 # RVM
 #============================================================================
 
-section "Making an RVM gemset for #{@app_name}"
-run "rvm #{ruby_version}"
-run "rvm gemset create #{@app_name}"
-run "rvm gemset use #{@app_name}"
-run "echo \"rvm ruby-#{ruby_version}@#{@app_name}\" > .rvmrc"
+unless DO_RVM.nil?
+  section "Making an RVM gemset for #{@app_name}"
+  run "rvm #{ruby_version}"
+  run "rvm gemset create #{@app_name}"
+  run "rvm gemset use #{@app_name}"
+  run "echo \"rvm ruby-#{ruby_version}@#{@app_name}\" > .rvmrc"
+end
 
 #============================================================================
 # Remove unneeded files
@@ -158,7 +162,6 @@ copy_file "rcov.opts", "spec/rcov.opts", :force => true
 copy_file "spec.opts", "spec/spec.opts", :force => true
 copy_file "mailer_macros.rb", "spec/support/mailer_macros.rb", force: true
 copy_file "Guardfile", "Guardfile", force: true
-
 
 #============================================================================
 # Install Formtastic stuff

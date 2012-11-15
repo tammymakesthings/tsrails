@@ -7,7 +7,7 @@
     = javascript_include_tag "application"
     = csrf_meta_tags
     = yield :head
-  %body.bp.two-col
+  %body
     #container
       #header
         Web Site
@@ -19,3 +19,4 @@
         = render :partial => 'shared/javascript'
       #footer
         = render :partial => 'shared/footer'
+  = yield :javascript
